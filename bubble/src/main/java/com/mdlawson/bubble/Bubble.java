@@ -11,6 +11,7 @@ import android.view.WindowManager;
 
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
+import com.facebook.rebound.SpringConfig;
 import com.facebook.rebound.SpringSystem;
 import com.facebook.rebound.SpringUtil;
 
@@ -21,7 +22,7 @@ public class Bubble {
     BubbleListener listener;
     WindowManager window;
     WindowManager.LayoutParams layout;
-    Spring spring;
+    SpringAnimator animator;
     Gravity gravity;
 
     public Bubble(View view) {
@@ -29,8 +30,7 @@ public class Bubble {
         context = view.getContext();
         window = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         listener = new SimpleBubbleListener();
-        spring = SpringSystem.create().createSpring();
-
+        animator = new SpringAnimator();
         view.setOnTouchListener(new TouchListener(context));
     }
 
@@ -58,6 +58,13 @@ public class Bubble {
         listener.onMove(view, layout.x, layout.y);
     }
 
+    private void moveTo(float x, float y) {
+        layout.x = (int) x;
+        layout.y = (int) y;
+        window.updateViewLayout(view, layout);
+        listener.onMove(view, layout.x, layout.y);
+    }
+
     public void hide() {
         window.removeView(view);
         listener.onHide();
@@ -65,7 +72,7 @@ public class Bubble {
     }
 
     private void applySpring() {
-
+        animator.animateTo(0,0);
     }
 
     private class TouchListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
@@ -113,14 +120,38 @@ public class Bubble {
             } else {
                 Log.d("BUBBLE", "FLING LEFT");
             }
+            applySpring();
             return true;
         }
     }
 
-    public class SpringListener extends SimpleSpringListener {
+    public class SpringAnimator extends SimpleSpringListener {
+
+        SpringSystem system;
+        Spring spring;
+        double startX;
+        double startY;
+
+        public SpringAnimator() {
+            system = SpringSystem.create();
+            spring = system.createSpring();
+            spring.addListener(this);
+        }
+
+        public void animateTo(float x, float y) {
+//            double dx = layout.x - x;
+//            double dy = layout.y - y;
+//            double distance = Math.sqrt(dx*dx+dy*dy);
+//            xRatio = dx/distance;
+//            yRatio = dy/distance;
+//            spring.setCurrentValue(distance);
+//            spring.setEndValue(0);
+        }
+
         @Override
         public void onSpringUpdate(Spring spring) {
-            super.onSpringUpdate(spring);
+            double value = spring.getCurrentValue();
+//            moveTo((float) (xRatio * value), (float) (yRatio * value));
         }
     }
 
