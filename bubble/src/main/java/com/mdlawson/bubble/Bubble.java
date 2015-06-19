@@ -2,6 +2,7 @@ package com.mdlawson.bubble;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -11,12 +12,10 @@ import android.view.WindowManager;
 
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
-import com.facebook.rebound.SpringConfig;
 import com.facebook.rebound.SpringSystem;
-import com.facebook.rebound.SpringUtil;
 
 public class Bubble {
-
+    public static final double HIDE_PROPORTION = 0.5;
     Context context;
     View view;
     BubbleListener listener;
@@ -24,6 +23,7 @@ public class Bubble {
     WindowManager.LayoutParams layout;
     SpringAnimator animator;
     Gravity gravity;
+    DisplayMetrics dm;
 
     public Bubble(View view) {
         this.view = view;
@@ -32,6 +32,8 @@ public class Bubble {
         listener = new SimpleBubbleListener();
         animator = new SpringAnimator();
         view.setOnTouchListener(new TouchListener(context));
+        dm = new DisplayMetrics();
+        window.getDefaultDisplay().getMetrics(dm);
     }
 
     public void show() {
@@ -72,7 +74,14 @@ public class Bubble {
     }
 
     private void applySpring() {
-        animator.animateTo(0,0);
+        Log.d("bubble", String.valueOf(view.getWidth()));
+        if (layout.x > (dm.widthPixels / 2) - view.getWidth() / 2) {
+            animator.animateTo((float) (dm.widthPixels +200), layout.y);
+            Log.d("Bubble", "SPRING RIGHT");
+        } else {
+            animator.animateTo((float) (-200), layout.y);
+            Log.d("Bubble", "SPRING LEFT");
+        }
     }
 
     private class TouchListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
@@ -131,27 +140,40 @@ public class Bubble {
         Spring spring;
         double startX;
         double startY;
+        double endX;
+        double endY;
+        double dx;
+        double dy;
+        boolean isAnimating;
 
         public SpringAnimator() {
             system = SpringSystem.create();
             spring = system.createSpring();
             spring.addListener(this);
+            isAnimating = false;
         }
 
         public void animateTo(float x, float y) {
-//            double dx = layout.x - x;
-//            double dy = layout.y - y;
-//            double distance = Math.sqrt(dx*dx+dy*dy);
-//            xRatio = dx/distance;
-//            yRatio = dy/distance;
-//            spring.setCurrentValue(distance);
-//            spring.setEndValue(0);
+            startX = layout.x;
+            startY = layout.y;
+            endX = x;
+            endY = y;
+            dx = layout.x - x;
+            dy = layout.y - y;
+            spring.setCurrentValue(0);
+            spring.setEndValue(1);
+            isAnimating = true;
         }
 
         @Override
         public void onSpringUpdate(Spring spring) {
+            if (!isAnimating) return;
             double value = spring.getCurrentValue();
-//            moveTo((float) (xRatio * value), (float) (yRatio * value));
+            moveTo((float) (startX - (dx * value)), (float) (startY - (dy * value)));
+            if (layout.x == endX && layout.y == endY) {
+                isAnimating = false;
+                Log.d("BUBBLE", "ANIMATION STOP");
+            }
         }
     }
 
