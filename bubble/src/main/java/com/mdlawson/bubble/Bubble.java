@@ -15,7 +15,7 @@ import com.facebook.rebound.Spring;
 import com.facebook.rebound.SpringSystem;
 
 public class Bubble {
-    public static final double HIDE_PROPORTION = 0.5;
+    public static final float HIDE_PROPORTION = 0.2f;
     Context context;
     View view;
     BubbleListener listener;
@@ -42,7 +42,8 @@ public class Bubble {
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
 
         layout.gravity = Gravity.TOP | Gravity.LEFT;
@@ -51,20 +52,22 @@ public class Bubble {
         layout.y = 100;
 
         window.addView(view, layout);
+        applySpring();
     }
 
     private void move(float dx, float dy) {
-        layout.x += dx;
-        layout.y += dy;
+        layout.x += Math.round(dx);
+        layout.y += Math.round(dy);
         window.updateViewLayout(view, layout);
         listener.onMove(view, layout.x, layout.y);
     }
 
     private void moveTo(float x, float y) {
-        layout.x = (int) x;
-        layout.y = (int) y;
+        layout.x = Math.round(x);
+        layout.y = Math.round(y);
         window.updateViewLayout(view, layout);
         listener.onMove(view, layout.x, layout.y);
+        //move(x - layout.x, y - layout.y); //TODO merge
     }
 
     public void hide() {
@@ -76,10 +79,10 @@ public class Bubble {
     private void applySpring() {
         Log.d("bubble", String.valueOf(view.getWidth()));
         if (layout.x > (dm.widthPixels / 2) - view.getWidth() / 2) {
-            animator.animateTo((float) (dm.widthPixels +200), layout.y);
+            animator.animateTo(dm.widthPixels - ((1-HIDE_PROPORTION) * view.getWidth()), layout.y);
             Log.d("Bubble", "SPRING RIGHT");
         } else {
-            animator.animateTo((float) (-200), layout.y);
+            animator.animateTo(-HIDE_PROPORTION * view.getWidth(), layout.y);
             Log.d("Bubble", "SPRING LEFT");
         }
     }
