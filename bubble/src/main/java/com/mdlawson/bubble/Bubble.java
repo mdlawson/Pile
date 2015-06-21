@@ -52,7 +52,7 @@ public class Bubble {
         layout.y = 100;
 
         window.addView(view, layout);
-        applySpring();
+        animator.flingWith(0,0);
     }
 
     private void move(float dx, float dy) {
@@ -76,16 +76,6 @@ public class Bubble {
 
     }
 
-    private void applySpring() {
-        Log.d("bubble", String.valueOf(view.getWidth()));
-        if (layout.x > (dm.widthPixels / 2) - view.getWidth() / 2) {
-            animator.animateTo(dm.widthPixels - ((1-HIDE_PROPORTION) * view.getWidth()), layout.y);
-            Log.d("Bubble", "SPRING RIGHT");
-        } else {
-            animator.animateTo(-HIDE_PROPORTION * view.getWidth(), layout.y);
-            Log.d("Bubble", "SPRING LEFT");
-        }
-    }
 
     private class TouchListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
 
@@ -110,7 +100,7 @@ public class Bubble {
                     lastY = event.getRawY();
                     return true;
                 case MotionEvent.ACTION_UP:
-                    applySpring();
+                    animator.flingWith(0,0);
                     return true;
             }
             return false;
@@ -132,7 +122,7 @@ public class Bubble {
             } else {
                 Log.d("BUBBLE", "FLING LEFT");
             }
-            applySpring();
+            animator.flingWith(velocityX, velocityY);
             return true;
         }
     }
@@ -158,6 +148,14 @@ public class Bubble {
             spring.setCurrentValue(0);
             spring.setVelocity(-10);
             spring.setEndValue(1);
+        }
+
+        public void flingWith(float dx, float dy) {
+            if (layout.x > (dm.widthPixels / 2) - view.getWidth() / 2) {
+                animateTo(dm.widthPixels - ((1-HIDE_PROPORTION) * view.getWidth()), layout.y);
+            } else {
+                animateTo(-HIDE_PROPORTION * view.getWidth(), layout.y);
+            }
         }
 
         @Override
