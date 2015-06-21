@@ -141,42 +141,29 @@ public class Bubble {
 
         SpringSystem system;
         Spring spring;
-        double startX;
-        double startY;
-        double endX;
-        double endY;
+        double lastValue;
         double dx;
         double dy;
-        boolean isAnimating;
 
         public SpringAnimator() {
             system = SpringSystem.create();
             spring = system.createSpring();
             spring.addListener(this);
-            isAnimating = false;
         }
 
         public void animateTo(float x, float y) {
-            startX = layout.x;
-            startY = layout.y;
-            endX = x;
-            endY = y;
             dx = layout.x - x;
             dy = layout.y - y;
+            lastValue = 0;
             spring.setCurrentValue(0);
+            spring.setVelocity(-10);
             spring.setEndValue(1);
-            isAnimating = true;
         }
 
         @Override
         public void onSpringUpdate(Spring spring) {
-            if (!isAnimating) return;
-            double value = spring.getCurrentValue();
-            moveTo((float) (startX - (dx * value)), (float) (startY - (dy * value)));
-            if (layout.x == endX && layout.y == endY) {
-                isAnimating = false;
-                Log.d("BUBBLE", "ANIMATION STOP");
-            }
+            double diff = lastValue - (lastValue = spring.getCurrentValue());
+            move((float) (dx * diff), (float) (dy * diff));
         }
     }
 
