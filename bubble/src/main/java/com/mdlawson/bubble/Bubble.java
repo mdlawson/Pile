@@ -130,29 +130,34 @@ public class Bubble {
     public class SpringAnimator extends SimpleSpringListener {
 
         SpringSystem system;
-        Spring spring;
-        double lastValue;
+        Spring springX;
+        Spring springY;
+        double lastX;
+        double lastY;
         double dx;
         double dy;
+        boolean isFling;
 
         public SpringAnimator() {
             system = SpringSystem.create();
-            spring = system.createSpring();
-            spring.addListener(this);
+            springX = system.createSpring();
+            springY = system.createSpring();
+            springX.addListener(this);
+            springY.addListener(this);
         }
 
         public void animateTo(float x, float y) {
             dx = layout.x - x;
             dy = layout.y - y;
-            lastValue = 0;
-            spring.setCurrentValue(0);
-            spring.setVelocity(-10);
-            spring.setEndValue(1);
+            lastX = 0;
+            springX.setCurrentValue(0);
+            springX.setEndValue(1);
         }
 
         public void flingWith(float dx, float dy) {
+            isFling = true;
             if (layout.x > (dm.widthPixels / 2) - view.getWidth() / 2) {
-                animateTo(dm.widthPixels - ((1-HIDE_PROPORTION) * view.getWidth()), layout.y);
+                animateTo(dm.widthPixels - ((1 - HIDE_PROPORTION) * view.getWidth()), layout.y);
             } else {
                 animateTo(-HIDE_PROPORTION * view.getWidth(), layout.y);
             }
@@ -160,8 +165,13 @@ public class Bubble {
 
         @Override
         public void onSpringUpdate(Spring spring) {
-            double diff = lastValue - (lastValue = spring.getCurrentValue());
+            double diff = lastX - (lastX = spring.getCurrentValue());
             move((float) (dx * diff), (float) (dy * diff));
+        }
+
+        @Override
+        public void onSpringAtRest(Spring spring) {
+            isFling = false;
         }
     }
 
