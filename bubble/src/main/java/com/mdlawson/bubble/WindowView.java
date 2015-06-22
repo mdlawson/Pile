@@ -10,6 +10,7 @@ public class WindowView {
     WindowManager.LayoutParams layout;
     Context context;
     View view;
+    private boolean isShown;
     public WindowView(View view) {
         this.view = view;
         context = view.getContext();
@@ -26,11 +27,17 @@ public class WindowView {
     }
 
     public void show() {
+        isShown = true;
         window.addView(view, layout);
     }
 
     public void hide() {
+        isShown = false;
         window.removeView(view);
+    }
+
+    public boolean isShown() {
+        return isShown;
     }
 
     protected void render() {

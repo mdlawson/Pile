@@ -16,12 +16,14 @@ public class Bubble extends WindowView {
     public static final float HIDE_PROPORTION = 0.2f;
     BubbleListener listener;
     SpringAnimator animator;
+    Remover remover;
     DisplayMetrics dm;
 
     public Bubble(View view) {
         super(view);
         listener = new SimpleBubbleListener();
         animator = new SpringAnimator();
+        remover = new Remover(context);
         view.setOnTouchListener(new TouchListener(context));
         dm = new DisplayMetrics();
         window.getDefaultDisplay().getMetrics(dm);
@@ -64,17 +66,21 @@ public class Bubble extends WindowView {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (gestureDetector.onTouchEvent(event)) {
+                remover.hide();
                 return true;
             }
-            switch (event.getAction()) {
+            int action = event.getAction();
+            switch (action) {
                 case MotionEvent.ACTION_MOVE:
                     move(event.getRawX() - lastX, event.getRawY() - lastY);
+                    remover.show();
                 case MotionEvent.ACTION_DOWN:
                     lastX = event.getRawX();
                     lastY = event.getRawY();
                     return true;
                 case MotionEvent.ACTION_UP:
                     animator.flingWith(0,0);
+                    remover.hide();
                     return true;
             }
             return false;
@@ -85,6 +91,11 @@ public class Bubble extends WindowView {
             Log.d("BUBBLE", "TAP");
             listener.onClick(view, (int) e.getRawX(), (int) e.getRawY());
             return true;
+        }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            remover.show();
         }
 
         @Override

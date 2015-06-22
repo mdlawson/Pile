@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="120dp"
+    android:layout_width="fill_parent" android:layout_height="fill_parent"
     android:background="@drawable/bottom_fade">
 
     <View
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="center"
+        android:layout_margin="40dp"
         android:background="@color/material_blue_grey_900"
         android:id="@+id/target" />
 </FrameLayout>
