@@ -1,34 +1,25 @@
 package com.mdlawson.bubble;
 
 import android.content.Context;
-import android.graphics.PixelFormat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
 import com.facebook.rebound.SpringSystem;
 
-public class Bubble {
+public class Bubble extends WindowView {
     public static final float HIDE_PROPORTION = 0.2f;
-    Context context;
-    View view;
     BubbleListener listener;
-    WindowManager window;
-    WindowManager.LayoutParams layout;
     SpringAnimator animator;
-    Gravity gravity;
     DisplayMetrics dm;
 
     public Bubble(View view) {
-        this.view = view;
-        context = view.getContext();
-        window = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        super(view);
         listener = new SimpleBubbleListener();
         animator = new SpringAnimator();
         view.setOnTouchListener(new TouchListener(context));
@@ -36,44 +27,27 @@ public class Bubble {
         window.getDefaultDisplay().getMetrics(dm);
     }
 
+    @Override
     public void show() {
-        layout = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                PixelFormat.TRANSLUCENT);
-
         layout.gravity = Gravity.TOP | Gravity.LEFT;
-
         layout.x = 100;
         layout.y = 100;
 
-        window.addView(view, layout);
-        animator.flingWith(0,0);
+        super.show();
+        animator.flingWith(0, 0);
     }
 
     private void move(float dx, float dy) {
         layout.x += Math.round(dx);
         layout.y += Math.round(dy);
-        window.updateViewLayout(view, layout);
+        render();
         listener.onMove(view, layout.x, layout.y);
     }
 
-    private void moveTo(float x, float y) {
-        layout.x = Math.round(x);
-        layout.y = Math.round(y);
-        window.updateViewLayout(view, layout);
-        listener.onMove(view, layout.x, layout.y);
-        //move(x - layout.x, y - layout.y); //TODO merge
-    }
-
+    @Override
     public void hide() {
-        window.removeView(view);
+        super.hide();
         listener.onHide();
-
     }
 
 
