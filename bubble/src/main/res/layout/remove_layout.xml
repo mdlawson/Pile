@@ -9,5 +9,6 @@
         android:layout_gravity="center"
         android:layout_margin="40dp"
         android:background="@color/material_blue_grey_900"
+        android:translationY="100dp"
         android:id="@+id/target" />
 </FrameLayout>

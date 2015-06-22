@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -22,16 +21,18 @@ public class Bubble extends WindowView {
     public Bubble(View view) {
         super(view);
         listener = new SimpleBubbleListener();
-        animator = new SpringAnimator();
-        remover = new Remover(context);
         view.setOnTouchListener(new TouchListener(context));
+
+        SpringSystem system = SpringSystem.create();
+        animator = new SpringAnimator(system);
+        remover = new Remover(context, system);
+
         dm = new DisplayMetrics();
         window.getDefaultDisplay().getMetrics(dm);
     }
 
     @Override
     public void show() {
-        layout.gravity = Gravity.TOP | Gravity.LEFT;
         layout.x = 100;
         layout.y = 100;
 
@@ -43,6 +44,7 @@ public class Bubble extends WindowView {
         layout.x += Math.round(dx);
         layout.y += Math.round(dy);
         render();
+        remover.onBubbleMove(layout.x, layout.y);
         listener.onMove(view, layout.x, layout.y);
     }
 
@@ -72,8 +74,8 @@ public class Bubble extends WindowView {
             int action = event.getAction();
             switch (action) {
                 case MotionEvent.ACTION_MOVE:
-                    move(event.getRawX() - lastX, event.getRawY() - lastY);
                     remover.show();
+                    move(event.getRawX() - lastX, event.getRawY() - lastY);
                 case MotionEvent.ACTION_DOWN:
                     lastX = event.getRawX();
                     lastY = event.getRawY();
@@ -114,7 +116,6 @@ public class Bubble extends WindowView {
 
     public class SpringAnimator extends SimpleSpringListener {
 
-        SpringSystem system;
         Spring springX;
         Spring springY;
         double lastX;
@@ -123,8 +124,7 @@ public class Bubble extends WindowView {
         double dy;
         boolean isFling;
 
-        public SpringAnimator() {
-            system = SpringSystem.create();
+        public SpringAnimator(SpringSystem system) {
             springX = system.createSpring();
             springY = system.createSpring();
             springX.addListener(this);

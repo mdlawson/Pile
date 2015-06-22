@@ -2,6 +2,7 @@ package com.mdlawson.bubble;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -24,16 +25,22 @@ public class WindowView {
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
+
+        layout.gravity = Gravity.TOP | Gravity.LEFT;
     }
 
     public void show() {
-        isShown = true;
-        window.addView(view, layout);
+        if (!isShown) {
+            isShown = true;
+            window.addView(view, layout);
+        }
     }
 
     public void hide() {
-        isShown = false;
-        window.removeView(view);
+        if (isShown) {
+            isShown = false;
+            window.removeView(view);
+        }
     }
 
     public boolean isShown() {
@@ -41,7 +48,7 @@ public class WindowView {
     }
 
     protected void render() {
-        window.updateViewLayout(view, layout);
+        if (isShown) window.updateViewLayout(view, layout);
     }
 
 }
