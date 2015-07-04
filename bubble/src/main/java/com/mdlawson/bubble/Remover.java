@@ -8,6 +8,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Scroller;
 
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
@@ -76,7 +77,6 @@ public class Remover extends WindowView {
 
             @Override
             public void onAnimationStart(Animator animation) {
-                spring.setCurrentValue(0);
                 spring.setEndValue(1);
             }
         });
