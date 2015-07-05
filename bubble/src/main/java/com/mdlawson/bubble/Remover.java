@@ -8,7 +8,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Scroller;
 
 import com.facebook.rebound.SimpleSpringListener;
 import com.facebook.rebound.Spring;
@@ -36,9 +35,7 @@ public class Remover extends WindowView {
         spring.addListener(new SimpleSpringListener() {
             @Override
             public void onSpringUpdate(Spring spring) {
-                float value = (float) spring.getCurrentValue();
-                target.setTranslationX((1 - value) * targetX);
-                target.setTranslationY(value * (targetYHidden - targetY));
+                updateTarget();
             }
         });
         setEnterAnimator(AnimatorInflater.loadAnimator(context, R.animator.fade_in));
@@ -52,8 +49,8 @@ public class Remover extends WindowView {
         enter.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                spring.setCurrentValue(1);
-                spring.setEndValue(0);
+                spring.setCurrentValue(0);
+                spring.setEndValue(1);
             }
         });
     }
@@ -77,7 +74,7 @@ public class Remover extends WindowView {
 
             @Override
             public void onAnimationStart(Animator animation) {
-                spring.setEndValue(1);
+                spring.setEndValue(0);
             }
         });
     }
@@ -100,15 +97,15 @@ public class Remover extends WindowView {
         }
         exit.start();
     }
+    public void onBubbleMove(WindowManager.LayoutParams layout, float dx, float dy) {
+        targetX += dx * 0.2f;
+        targetY += dy * 0.1f;
+        if (spring.isAtRest()) updateTarget();
+    }
 
-    public void onBubbleMove(float x, float y) {
-        float dx = x - target.getX() - targetX;
-        float dy = y - target.getY() - targetY;
-        targetX = dx * 0.2f;
-        targetY = dy * 0.2f;
-        if (!enter.isRunning() && !exit.isRunning() && spring.isAtRest()) {
-            target.setTranslationX(targetX);
-            target.setTranslationY(targetY);
-        }
+    private void updateTarget() {
+        float value = (float) spring.getCurrentValue();
+        target.setTranslationX(value * targetX);
+        target.setTranslationY((1 - value) * targetYHidden + value * targetY);
     }
 }
