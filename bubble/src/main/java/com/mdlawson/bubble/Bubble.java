@@ -23,7 +23,7 @@ public class Bubble extends WindowView {
     public Bubble(View view) {
         super(view);
 
-        layout.gravity = Gravity.CENTER;
+        layout.gravity = Gravity.CENTER | Gravity.BOTTOM;
 
         listener = new SimpleBubbleListener();
         view.setOnTouchListener(new TouchListener(context));
@@ -39,16 +39,15 @@ public class Bubble extends WindowView {
 
     @Override
     public void show() {
-//        layout.x = (dm.widthPixels / 2);
-//        layout.y = 100;
-
+        remover.reset();
+        layout.y = Math.round(remover.targetYHidden/2); // line up with remover initially to ease calculation
         super.show();
         animator.flingWith(0, 0);
     }
 
     private void move(float dx, float dy) {
         layout.x += Math.round(dx);
-        layout.y += Math.round(dy);
+        layout.y -= Math.round(dy);
         remover.onBubbleMove(layout, dx, dy);
         render();
         listener.onMove(view, layout.x, layout.y);
@@ -60,6 +59,9 @@ public class Bubble extends WindowView {
         listener.onHide();
     }
 
+    private void checkShouldSpringToRemover() {
+
+    }
 
     private class TouchListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
 
@@ -82,6 +84,7 @@ public class Bubble extends WindowView {
                 case MotionEvent.ACTION_MOVE:
                     remover.show();
                     move(event.getRawX() - lastX, event.getRawY() - lastY);
+                    checkShouldSpringToRemover();
                 case MotionEvent.ACTION_DOWN:
                     lastX = event.getRawX();
                     lastY = event.getRawY();
@@ -137,9 +140,9 @@ public class Bubble extends WindowView {
             springY.addListener(this);
         }
 
-        public void animateTo(float x, float y) {
-            dx = layout.x - x;
-            dy = layout.y - y;
+        public void animateTo(float dx, float dy) {
+            this.dx = dx;
+            this.dy = dy;
             lastX = 0;
             springX.setCurrentValue(0);
             springX.setEndValue(1);
@@ -147,7 +150,7 @@ public class Bubble extends WindowView {
 
         public void flingWith(float dx, float dy) {
             isFling = true;
-            animateTo(Math.copySign(hidePosition, layout.x), layout.y);
+            animateTo(layout.x - Math.copySign(hidePosition, layout.x), 0);
         }
 
         @Override

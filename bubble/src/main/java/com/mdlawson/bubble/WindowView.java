@@ -2,7 +2,6 @@ package com.mdlawson.bubble;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -25,8 +24,6 @@ public class WindowView {
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT);
-
-        layout.gravity = Gravity.TOP | Gravity.LEFT;
     }
 
     public void show() {

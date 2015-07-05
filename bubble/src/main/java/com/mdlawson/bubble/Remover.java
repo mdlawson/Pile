@@ -29,7 +29,7 @@ public class Remover extends WindowView {
         targetYHidden = target.getTranslationY();
 
         layout.width = WindowManager.LayoutParams.MATCH_PARENT;
-        layout.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        layout.gravity = Gravity.BOTTOM | Gravity.CENTER;
 
         spring = system.createSpring();
         spring.addListener(new SimpleSpringListener() {
@@ -108,4 +108,17 @@ public class Remover extends WindowView {
         target.setTranslationX(value * targetX);
         target.setTranslationY((1 - value) * targetYHidden + value * targetY);
     }
+
+    public void reset() {
+        targetX = targetY = 0;
+    }
+
+    public boolean isClose() {
+        float dx = target.getTranslationX();
+        float dy = target.getTranslationY();
+        float d = (float) Math.sqrt(dx * dx + dy * dy);
+        return d < 50;
+    }
+
+
 }
