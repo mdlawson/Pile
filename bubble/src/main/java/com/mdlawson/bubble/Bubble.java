@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -17,9 +18,13 @@ public class Bubble extends WindowView {
     SpringAnimator animator;
     Remover remover;
     DisplayMetrics dm;
+    float hidePosition;
 
     public Bubble(View view) {
         super(view);
+
+        layout.gravity = Gravity.CENTER;
+
         listener = new SimpleBubbleListener();
         view.setOnTouchListener(new TouchListener(context));
 
@@ -29,12 +34,13 @@ public class Bubble extends WindowView {
 
         dm = new DisplayMetrics();
         window.getDefaultDisplay().getMetrics(dm);
+        hidePosition = (dm.widthPixels / 2) + (view.getWidth() * HIDE_PROPORTION);
     }
 
     @Override
     public void show() {
-        layout.x = 100;
-        layout.y = 100;
+//        layout.x = (dm.widthPixels / 2);
+//        layout.y = 100;
 
         super.show();
         animator.flingWith(0, 0);
@@ -43,8 +49,8 @@ public class Bubble extends WindowView {
     private void move(float dx, float dy) {
         layout.x += Math.round(dx);
         layout.y += Math.round(dy);
+        remover.onBubbleMove(layout, dx, dy);
         render();
-        remover.onBubbleMove(layout.x, layout.y);
         listener.onMove(view, layout.x, layout.y);
     }
 
@@ -141,11 +147,7 @@ public class Bubble extends WindowView {
 
         public void flingWith(float dx, float dy) {
             isFling = true;
-            if (layout.x > (dm.widthPixels / 2) - view.getWidth() / 2) {
-                animateTo(dm.widthPixels - ((1 - HIDE_PROPORTION) * view.getWidth()), layout.y);
-            } else {
-                animateTo(-HIDE_PROPORTION * view.getWidth(), layout.y);
-            }
+            animateTo(Math.copySign(hidePosition, layout.x), layout.y);
         }
 
         @Override
