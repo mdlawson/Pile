@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent" android:layout_height="fill_parent"
-    android:background="@drawable/bottom_fade">
+    android:layout_width="fill_parent" android:layout_height="fill_parent">
 
     <View
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_gravity="center"
+        android:layout_gravity="bottom|center"
         android:layout_margin="40dp"
-        android:background="@color/material_blue_grey_900"
         android:translationY="100dp"
-        android:id="@+id/target" />
+        android:background="@color/material_blue_grey_900"
+        android:id="@+id/target"
+        />
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:background="@drawable/bottom_fade"
+        android:layout_gravity="bottom"
+        android:id="@+id/fade"/>
 </FrameLayout>

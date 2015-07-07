@@ -18,6 +18,7 @@ public class Remover extends WindowView {
     Animator enter;
     Animator exit;
     View target;
+    View fade;
     float targetYHidden;
     float targetX;
     float targetY;
@@ -26,9 +27,10 @@ public class Remover extends WindowView {
     public Remover(Context context, SpringSystem system) {
         super(LayoutInflater.from(context).inflate(R.layout.remove_layout, null));
         target = view.findViewById(R.id.target);
+        fade = view.findViewById(R.id.fade);
         targetYHidden = target.getTranslationY();
 
-        layout.width = WindowManager.LayoutParams.MATCH_PARENT;
+        layout.width = layout.height = WindowManager.LayoutParams.MATCH_PARENT;
         layout.gravity = Gravity.BOTTOM | Gravity.CENTER;
 
         spring = system.createSpring();
@@ -36,6 +38,13 @@ public class Remover extends WindowView {
             @Override
             public void onSpringUpdate(Spring spring) {
                 updateTarget();
+            }
+
+            @Override
+            public void onSpringAtRest(Spring spring) {
+                if (spring.getCurrentValue() == 0) {
+                    Remover.super.hide();
+                }
             }
         });
         setEnterAnimator(AnimatorInflater.loadAnimator(context, R.animator.fade_in));
@@ -45,7 +54,7 @@ public class Remover extends WindowView {
 
     private void setEnterAnimator(Animator animator) {
         enter = animator;
-        enter.setTarget(view);
+        enter.setTarget(fade);
         enter.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -57,21 +66,8 @@ public class Remover extends WindowView {
 
     private void setExitAnimator(Animator animator) {
         exit = animator;
-        exit.setTarget(view);
+        exit.setTarget(fade);
         exit.addListener(new AnimatorListenerAdapter() {
-            boolean canceled = false;
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                canceled = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (!canceled) Remover.super.hide();
-                canceled = false;
-            }
-
             @Override
             public void onAnimationStart(Animator animation) {
                 spring.setEndValue(0);
@@ -81,6 +77,7 @@ public class Remover extends WindowView {
 
     @Override
     public void show() {
+
         if (exit.isRunning()) {
             exit.cancel();
             enter.setupStartValues();
@@ -113,12 +110,11 @@ public class Remover extends WindowView {
         targetX = targetY = 0;
     }
 
-    public boolean isClose() {
-        float dx = target.getTranslationX();
-        float dy = target.getTranslationY();
-        float d = (float) Math.sqrt(dx * dx + dy * dy);
-        return d < 50;
+    public float getTargetX() {
+        return target.getX();
     }
 
-
+    public float getTargetY() {
+        return target.getY();
+    }
 }

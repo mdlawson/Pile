@@ -19,6 +19,7 @@ public class Bubble extends WindowView {
     Remover remover;
     DisplayMetrics dm;
     float hidePosition;
+    boolean isRemoving;
 
     public Bubble(View view) {
         super(view);
@@ -40,7 +41,6 @@ public class Bubble extends WindowView {
     @Override
     public void show() {
         remover.reset();
-        layout.y = Math.round(remover.targetYHidden/2); // line up with remover initially to ease calculation
         super.show();
         animator.flingWith(0, 0);
     }
@@ -59,8 +59,22 @@ public class Bubble extends WindowView {
         listener.onHide();
     }
 
-    private void checkShouldSpringToRemover() {
+    private boolean isCloseToRemover() {
+        float dx = layout.x - remover.getTargetX();
+        float dy = layout.y - remover.getTargetY();
+        System.out.printf("dx: %f dy: %f\n", dx, dy);
+        return Math.sqrt(dx*dx+dy*dy) < 50;
+    }
 
+    private void checkShouldSpringToRemover(float fromX, float fromY) {
+        if (!isRemoving && isCloseToRemover()) {
+            isRemoving = true;
+            System.out.printf("close\n");
+            animator.animateTo(remover.getTargetX(), remover.getTargetY());
+        }
+        else if (isRemoving && !isCloseToRemover()) {
+//            animator.animateTo(fromX, dm.heightPixels - fromY);
+        }
     }
 
     private class TouchListener extends GestureDetector.SimpleOnGestureListener implements View.OnTouchListener {
@@ -84,7 +98,7 @@ public class Bubble extends WindowView {
                 case MotionEvent.ACTION_MOVE:
                     remover.show();
                     move(event.getRawX() - lastX, event.getRawY() - lastY);
-                    checkShouldSpringToRemover();
+                    checkShouldSpringToRemover(event.getRawX(), event.getRawY());
                 case MotionEvent.ACTION_DOWN:
                     lastX = event.getRawX();
                     lastY = event.getRawY();
@@ -140,9 +154,9 @@ public class Bubble extends WindowView {
             springY.addListener(this);
         }
 
-        public void animateTo(float dx, float dy) {
-            this.dx = dx;
-            this.dy = dy;
+        public void animateTo(float x, float y) {
+            dx = layout.x - x;
+            dy = layout.y - y;
             lastX = 0;
             springX.setCurrentValue(0);
             springX.setEndValue(1);
@@ -150,7 +164,7 @@ public class Bubble extends WindowView {
 
         public void flingWith(float dx, float dy) {
             isFling = true;
-            animateTo(layout.x - Math.copySign(hidePosition, layout.x), 0);
+            animateTo(Math.copySign(hidePosition, layout.x), layout.y);
         }
 
         @Override
@@ -162,6 +176,7 @@ public class Bubble extends WindowView {
         @Override
         public void onSpringAtRest(Spring spring) {
             isFling = false;
+            if (isRemoving && !isCloseToRemover()) isRemoving = false;
         }
     }
 
